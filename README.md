@@ -178,7 +178,7 @@ mlflow models serve \
             -H "Content-Type: application/json" \
             -d '{"name": "penguins"}' | \
         jq -r '.model_versions[0].version'
-    ) -h 0.0.0.0 -p 8080 --no-conda
+    ) -h 127.0.0.1 -p 8080 --no-conda
 ```
 
 By default, MLflow uses [Flask](https://flask.palletsprojects.com/en/1.1.x/) to serve the inference endpoint. Flask is a lightweight web framework and might not be suitable for production use cases. If you need a more robust and scalable inference server, you can use [MLServer](https://mlserver.readthedocs.io/en/latest/), an open-source project that provides a standardized interface for deploying and serving models.
