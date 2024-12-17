@@ -2,23 +2,23 @@ python-dotenv
 pytest
 pylint
 
-mlflow
+mlflow==2.17.1
 mlflow[extras]
 mlserver
 mlserver-mlflow
 
 awscurl
 packaging
-setuptools
-evidently
-keras
-scikit-learn
-pandas
-numpy
-jax[cpu]
+setuptools==75.1.0
+evidently==0.4.33
+keras==3.6.0
+scikit-learn==1.5.2
+pandas==2.2.3
+numpy==2.1.1
+jax[cpu]==0.4.35
 
 metaflow
 metaflow-card-html
 
-azure-ai-ml
-azureml-mlflow
+azure-ai-ml==1.19.0
+azureml-mlflow==1.57.0.post1

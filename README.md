@@ -188,7 +188,7 @@ To deploy the model using MLServer, execute the `mlflow models serve` command ab
 After the server starts running, you can test the model by sending a request with a sample input. The following command will output the prediction for the given input:
 
 ```shell
-curl -X POST http://0.0.0.0:8080/invocations \
+curl -X POST http://127.0.0.1:8080/invocations \
     -H "Content-Type: application/json" \
     -d '{"inputs": [{
             "island": "Biscoe",
