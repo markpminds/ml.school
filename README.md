@@ -417,11 +417,11 @@ export $((echo "ENDPOINT_NAME=penguins" >> .env; cat .env) | xargs)
 
 Before deploying the model to SageMaker, you must build a Docker image and push it to the [Elastic Container Registry](https://aws.amazon.com/ecr/) (ECR). You can do this by running the following command:
 
+**macOS users**: Before running the above command, open the Docker Desktop application and under Advanced Settings, select the option "Allow the default Docker socket to be used" and restart Docker.
+
 ```shell
 mlflow sagemaker build-and-push-container
 ```
-
-**macOS users**: Before running the above command, open the Docker Desktop application and under Advanced Settings, select the option "Allow the default Docker socket to be used" and restart Docker.
 
 Once the image finishes uploading, run the [Training Pipeline](#training-the-model). After you have successfuly ran this pipeline, you can proceed to run the deployment pipeline from the repository's root directory:
 

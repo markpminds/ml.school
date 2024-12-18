@@ -40,12 +40,25 @@ ecr_registry="${account}.dkr.ecr.${region}.amazonaws.com"
 aws ecr get-login-password --region "${region}" \
     | docker login --username AWS --password-stdin "${ecr_registry}"
 
-# Build the docker image locally with the image name
-DOCKER_BUILDKIT=0 docker build -t "${image}:latest" .
 
 # Tag the image with the full name and latest
-fullname="${ecr_registry}/${image}:latest"
+fullname="${ecr_registry}/${image}:2.17.1"
 docker tag ${image} ${fullname}
 
 # Push the image to ECR
 docker push ${fullname}
+
+
+
+# podman build --format docker 
+
+# replace docker with podman
+
+# docker build -t test . 
+
+# docker tag test {id}.dkr.ecr.us-east-2.amazonaws.com/mlflow-pyfunc:test
+
+# aws ecr get-login-password --region "us-east-2" \                          
+#     | docker login --username AWS --password-stdin "{id}.dkr.ecr.us-east-2.amazonaws.com/mlflow-pyfunc"
+
+# docker push {id}.dkr.ecr.us-east-2.amazonaws.com/mlflow-pyfunc:test
