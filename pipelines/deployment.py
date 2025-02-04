@@ -185,7 +185,7 @@ class Deployment(FlowSpec, FlowMixin):
         deployment_configuration = {
             "instance_type": "ml.m4.xlarge",
             "instance_count": 1,
-            "synchronous": True,
+            "synchronous": False,
             # We want to archive resources associated with the endpoint that become
             # inactive as the result of updating an existing deployment.
             "archive": True,

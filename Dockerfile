@@ -6,7 +6,7 @@ RUN apt-get -y update && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get insta
 # Setup pyenv
 RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata \
     libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm \
-    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+    libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev libevent-dev
 RUN git clone \
     --depth 1 \
     --branch $(git ls-remote --tags --sort=v:refname https://github.com/pyenv/pyenv.git | grep -o -E 'v[1-9]+(\.[1-9]+)+$' | tail -1) \
@@ -19,16 +19,22 @@ RUN apt install -y python3.9 python3.9-distutils \
     && python /tmp/get-pip.py
 RUN pip install virtualenv
 
-
 # Setup Java
 RUN apt-get install -y --no-install-recommends openjdk-11-jdk maven
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
-ENV PATH="$JAVA_HOME/bin:$PATH"
+#ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+#ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-# Verify the JAVA_HOME setup
+# Alternative approach - find Java path dynamically
+RUN update-alternatives --query java | grep 'Value: ' | grep -o '/.*java' | sed 's/\/bin\/java//' > /tmp/java_path && \
+    export JAVA_HOME=$(cat /tmp/java_path) && \
+    echo "export JAVA_HOME=$JAVA_HOME" >> /etc/environment && \
+    echo "export PATH=$PATH:$JAVA_HOME/bin" >> /etc/environment
+
+# Verify Java installation and JAVA_HOME
 RUN echo "JAVA_HOME is set to: $JAVA_HOME" && \
-    java -version && javac -version
-RUN ls -l /usr/lib/jvm/ && echo "JAVA_HOME: $JAVA_HOME" && java -version && javac -version
+    java -version && \
+    javac -version && \
+    mvn -version
 
 WORKDIR /opt/mlflow
 
@@ -37,15 +43,22 @@ RUN pip install mlflow==2.17.1
 
 # Install Java mlflow-scoring from Maven Central
 # does not work, complains about JAVA_HOME variable being incorrect
-# RUN mvn --batch-mode dependency:copy -Dartifact=org.mlflow:mlflow-scoring:2.17.1:pom -DoutputDirectory=/opt/java 
-# RUN mvn --batch-mode dependency:copy -Dartifact=org.mlflow:mlflow-scoring:2.17.1:jar -DoutputDirectory=/opt/java/jars 
-# RUN cp /opt/java/mlflow-scoring-2.17.1.pom /opt/java/pom.xml
-# RUN cd /opt/java && mvn --batch-mode dependency:copy-dependencies -DoutputDirectory=/opt/java/jars 
+RUN mvn --batch-mode dependency:copy -Dartifact=org.mlflow:mlflow-scoring:2.17.1:pom -DoutputDirectory=/opt/java 
+RUN mvn --batch-mode dependency:copy -Dartifact=org.mlflow:mlflow-scoring:2.17.1:jar -DoutputDirectory=/opt/java/jars 
+RUN cp /opt/java/mlflow-scoring-2.17.1.pom /opt/java/pom.xml
+RUN cd /opt/java && mvn --batch-mode dependency:copy-dependencies -DoutputDirectory=/opt/java/jars 
 
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    python3.9-dev \
+    python3-dev \
+    gcc \
+    libevent-dev \
+    make
 
+# RUN pip install --no-cache-dir gevent==23.9.1
 # Install minimal serving dependencies
 # does not work, fails to build wheel for gevent
-# RUN python -c "from mlflow.models.container import _install_pyfunc_deps;_install_pyfunc_deps(None, False)"
+RUN python -c "from mlflow.models.container import _install_pyfunc_deps;_install_pyfunc_deps(None, False)"
 
 ENV MLFLOW_DISABLE_ENV_CREATION=False
 ENV ENABLE_MLSERVER=False
